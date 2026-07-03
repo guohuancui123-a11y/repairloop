@@ -1,5 +1,54 @@
 # Release Notes Draft
 
+## v0.1.1 - First-run CLI Polish
+
+This release upgrades the original v0.1 prototype with fixes found by testing Lobster from a normal user/browser perspective.
+
+### Highlights
+
+- Invalid repair options now return friendly CLI errors instead of Python tracebacks.
+- Dry-run repair output now clearly marks preview mode with `[PREVIEW] no changes were made`.
+- Missing or mistyped target commands are classified as `command_start_error`.
+- Command startup failures now include practical PATH and `--` usage guidance.
+- README examples were synced with real command output so first-time users see what the docs promise.
+- Test coverage increased from `19 passed` to `23 passed`.
+
+### Why This Matters
+
+v0.1 proved the core loop: run broken Python, detect the real failure, apply a small local repair, and verify by rerunning.
+
+v0.1.1 makes that loop feel safer for first-time users. The tool now explains when it is only previewing, avoids scary tracebacks for bad CLI input, and gives clearer guidance when the target command cannot even start.
+
+### Verified
+
+```text
+python -m pytest -q
+23 passed
+```
+
+```text
+python -m lobster_ai_system repair -- python demo\missing_file.py
+[PREVIEW] no changes were made; rerun with --apply to execute this fix
+[VERIFY] not rerun; preview mode only
+```
+
+```text
+python -m lobster_ai_system repair --apply --max-iterations 2 -- python demo\missing_file.py
+[VERIFY] success
+```
+
+```text
+python -m lobster_ai_system run -- definitely-not-a-real-command-for-lobster-tests
+[FIX] command_start_error
+[FIX] The target command could not be started.
+```
+
+### Still Honest About Limits
+
+- Unknown runtime errors still get conservative guidance only.
+- The base engine remains rule-driven and local-first, not a general AI coding agent.
+- Broader repair coverage and rollback restore UX are still roadmap items.
+
 ## v0.1.0 - Local-first Repair Prototype
 
 Lobster AI is now a runnable local-first Python runtime repair engine.

@@ -12,6 +12,16 @@ BROKEN CODE → CRASH → FIX → RETRY → ✅ SUCCESS
 
 Lobster is a local-first repair loop for Python runtime failures. It runs your command, reads the real error, applies a small safe fix, then reruns the same command to prove the repair worked.
 
+## Latest Update: v0.1.1
+
+This release focuses on first-run trust and CLI polish after black-box testing the project like a new user:
+
+- Invalid options now return clear CLI errors instead of Python tracebacks.
+- Dry-run mode now says `[PREVIEW] no changes were made`, so users know it is safe.
+- Missing or mistyped target commands are recognized as `command_start_error` with PATH / `--` usage guidance.
+- README examples now match the real command output.
+- Test coverage increased to `23 passed`.
+
 ## 10-Second Demo
 
 ![Lobster 10-second demo](docs/assets/lobster-demo.gif)
