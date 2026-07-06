@@ -27,6 +27,7 @@ It is a deterministic repair loop for Python runtime failures:
 - **Small-patch biased:** it prefers narrow actions over broad rewrites.
 - **Safe by default:** dry-run is the default; `--apply` is required for changes.
 - **Automation-ready:** JSON reports make it usable from CI, launchers, and agent runtimes.
+- **Open-core path:** the Community edition stays useful, while deeper commercial workflows belong in the private Pro edition.
 
 If this saves you time, a GitHub star helps the project reach more builders.
 
@@ -354,6 +355,8 @@ Lobster is intentionally open source, but it is not anonymous raw material. If t
 - Use `NOTICE`, `CITATION.cff`, and `BRANDING.md` when publishing derivative work.
 
 Human-readable CLI output and JSON reports include a source attribution field so logs, demos, and automation artifacts can trace back to the original repository.
+
+For commercial positioning and the Community/Pro split, see [`COMMERCIAL.md`](COMMERCIAL.md).
 
 Recommended attribution line:
 
