@@ -2,15 +2,33 @@
 
 # Lobster
 
-## Run broken Python code → it fixes itself.
+## A local-first Python repair engine for developers, CI, and AI agent workflows.
 
-No API key. No cloud. No prompt guessing.
+Run broken Python code. Capture the real crash. Apply the smallest safe repair. Verify by rerunning the same command.
+
+No API key. No cloud. No prompt guessing. No full-project rewrite.
 
 ```text
 BROKEN CODE → CRASH → FIX → RETRY → ✅ SUCCESS
 ```
 
 Lobster is a local-first repair loop for Python runtime failures. It runs your command, reads the real error, applies a small safe fix, then reruns the same command to prove the repair worked.
+
+Use it when you want a boring, inspectable repair primitive instead of a black-box coding agent.
+
+## What It Is
+
+Lobster is not a chatbot and not a general autonomous developer.
+
+It is a deterministic repair loop for Python runtime failures:
+
+- **Local-first:** the base engine runs without sending source code to a cloud service.
+- **Crash-driven:** it starts from actual stderr/stdout, not a vague prompt.
+- **Small-patch biased:** it prefers narrow actions over broad rewrites.
+- **Safe by default:** dry-run is the default; `--apply` is required for changes.
+- **Automation-ready:** JSON reports make it usable from CI, launchers, and agent runtimes.
+
+If this saves you time, a GitHub star helps the project reach more builders.
 
 ## Latest Update: v0.1.2
 
@@ -40,6 +58,14 @@ Watch the MP4 version: [docs/assets/lobster-demo.mp4](docs/assets/lobster-demo.m
 That is the whole idea: **run the broken thing, repair the real failure, verify the result.**
 
 ## Try It
+
+Clone and install locally:
+
+```powershell
+git clone https://github.com/guohuancui123-a11y/lobster-ai-system.git
+cd lobster-ai-system
+python -m pip install -e .
+```
 
 Dry-run first. Lobster shows the repair without changing anything:
 
