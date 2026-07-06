@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -119,6 +120,39 @@ def print_result(result: RunResult) -> None:
     print("\n[SUCCESS]" if result.ok else "\n[FAILED]")
 
 
+def result_payload(result: RunResult) -> dict[str, object]:
+    error = first_blocking_error(result)
+    suggestion = suggest_fix(blocking_error_context(result)) if not result.ok else None
+    return {
+        "command": result.command,
+        "returncode": result.returncode,
+        "ok": result.ok,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "error": error,
+        "suggestion": None
+        if suggestion is None
+        else {
+            "kind": suggestion.kind.value,
+            "summary": suggestion.summary,
+            "commands": suggestion.commands,
+            "actions": suggestion.actions or [],
+            "notes": suggestion.notes,
+        },
+    }
+
+
+def apply_payload(result: ApplyResult) -> dict[str, object]:
+    return {
+        "attempted": result.attempted,
+        "ok": result.ok,
+        "command": result.command,
+        "stdout": result.stdout,
+        "stderr": result.stderr,
+        "reason": result.reason,
+    }
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="lobster-ai",
@@ -127,10 +161,12 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command_name")
 
     run_parser = subparsers.add_parser("run", help="Run a target command and capture output.")
+    run_parser.add_argument("--json-report", action="store_true", help="Print a machine-readable JSON report.")
     run_parser.add_argument("target", nargs=argparse.REMAINDER, help="Command to execute. Use -- before the target command.")
 
     repair_parser = subparsers.add_parser("repair", help="Run, suggest a fix, optionally apply it, and rerun.")
     repair_parser.add_argument("--apply", action="store_true", help="Execute safe automatic fix commands.")
+    repair_parser.add_argument("--json-report", action="store_true", help="Print a machine-readable JSON report.")
     repair_parser.add_argument("--max-iterations", type=int, default=2, help="Maximum repair iterations.")
     repair_parser.add_argument("target", nargs=argparse.REMAINDER, help="Command to execute. Use -- before the target command.")
 
@@ -146,33 +182,52 @@ def normalize_target(raw_target: Sequence[str], parser: argparse.ArgumentParser,
     return target
 
 
-def repair_loop(target: Sequence[str], *, apply: bool, max_iterations: int) -> int:
+def repair_loop(target: Sequence[str], *, apply: bool, max_iterations: int, json_report: bool = False) -> int:
     if max_iterations < 1:
-        print("[ERROR] --max-iterations must be at least 1", file=sys.stderr)
+        if json_report:
+            print(json.dumps({"ok": False, "error": "--max-iterations must be at least 1"}, indent=2))
+        else:
+            print("[ERROR] --max-iterations must be at least 1", file=sys.stderr)
         return 2
 
     last_result: RunResult | None = None
+    iterations: list[dict[str, object]] = []
     for iteration in range(1, max_iterations + 1):
-        print(f"\n[ITERATION {iteration}]")
         result = run_command(target)
         last_result = result
-        print_result(result)
+        iteration_payload: dict[str, object] = {"iteration": iteration, "run": result_payload(result)}
+        if not json_report:
+            print(f"\n[ITERATION {iteration}]")
+            print_result(result)
         if result.ok:
-            print("\n[VERIFY] success")
+            iterations.append(iteration_payload)
+            if json_report:
+                print(json.dumps({"ok": True, "verified": True, "iterations": iterations}, indent=2))
+            else:
+                print("\n[VERIFY] success")
             return 0
 
         error = blocking_error_context(result)
         suggestion = suggest_fix(error)
         apply_result = apply_suggestion(suggestion, enabled=apply)
-        print_apply_result(apply_result)
+        iteration_payload["apply"] = apply_payload(apply_result)
+        iterations.append(iteration_payload)
+        if not json_report:
+            print_apply_result(apply_result)
         if not apply_result.ok:
-            if not apply and not apply_result.attempted:
-                print("\n[VERIFY] not rerun; preview mode only")
+            if json_report:
+                print(json.dumps({"ok": False, "verified": False, "preview": not apply, "iterations": iterations}, indent=2))
             else:
-                print("\n[VERIFY] not rerun; apply step did not complete")
+                if not apply and not apply_result.attempted:
+                    print("\n[VERIFY] not rerun; preview mode only")
+                else:
+                    print("\n[VERIFY] not rerun; apply step did not complete")
             return result.returncode
 
-    print("\n[VERIFY] failed; iteration limit reached")
+    if json_report:
+        print(json.dumps({"ok": False, "verified": False, "reason": "iteration limit reached", "iterations": iterations}, indent=2))
+    else:
+        print("\n[VERIFY] failed; iteration limit reached")
     return last_result.returncode if last_result else 1
 
 
@@ -183,12 +238,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command_name == "run":
         target = normalize_target(args.target, parser, "run")
         result = run_command(target)
-        print_result(result)
+        if args.json_report:
+            print(json.dumps(result_payload(result), indent=2))
+        else:
+            print_result(result)
         return result.returncode
 
     if args.command_name == "repair":
         target = normalize_target(args.target, parser, "repair")
-        return repair_loop(target, apply=args.apply, max_iterations=args.max_iterations)
+        return repair_loop(target, apply=args.apply, max_iterations=args.max_iterations, json_report=args.json_report)
 
     parser.print_help()
     return 0

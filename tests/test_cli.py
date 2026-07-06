@@ -1,4 +1,6 @@
-from lobster_ai_system.cli import RunResult, first_blocking_error, print_apply_result, repair_loop, run_command
+import json
+
+from lobster_ai_system.cli import RunResult, first_blocking_error, main, print_apply_result, repair_loop, run_command
 from lobster_ai_system.core.apply_engine import ApplyResult
 
 
@@ -47,3 +49,25 @@ def test_run_command_reports_startup_errors_without_traceback():
 
     assert result.returncode == 127
     assert "Could not start command" in result.stderr
+
+
+def test_run_json_report_outputs_machine_readable_payload(capsys):
+    code = main(["run", "--json-report", "--", "python", "-c", "print('json-ok')"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert code == 0
+    assert payload["ok"] is True
+    assert payload["returncode"] == 0
+    assert payload["stdout"].strip() == "json-ok"
+
+
+def test_repair_json_report_preview_is_machine_readable(capsys):
+    code = main(["repair", "--json-report", "--", "python", "demo/missing_file.py"])
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+    assert code != 0
+    assert payload["ok"] is False
+    assert payload["preview"] is True
+    assert payload["iterations"][0]["run"]["suggestion"]["kind"] == "file_not_found"

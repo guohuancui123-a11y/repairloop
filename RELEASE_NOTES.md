@@ -1,5 +1,36 @@
 # Release Notes Draft
 
+## v0.1.2 - JSON Reports for Automation
+
+This release makes Lobster easier to use from CI, scripts, and other agent runtimes by adding structured JSON output.
+
+### Highlights
+
+- Added `--json-report` to `run`.
+- Added `--json-report` to `repair`.
+- Reports include command result, blocking error, suggested fix, preview/apply state, and verification status.
+- Human logs are suppressed in JSON mode so output is parseable.
+- Test coverage increased from `23 passed` to `25 passed`.
+
+### Why This Matters
+
+The original CLI was human-readable. That is useful for a terminal demo, but less mature for automation. JSON reports make Lobster usable as a local repair primitive inside CI jobs, scripts, launchers, and agent systems that need to inspect structured outcomes.
+
+### Verified
+
+```text
+python -m pytest -q
+25 passed
+```
+
+```text
+python -m lobster_ai_system run --json-report -- python -c "print('json-ok')"
+```
+
+```text
+python -m lobster_ai_system repair --json-report -- python demo/missing_file.py
+```
+
 ## v0.1.1 - First-run CLI Polish
 
 This release upgrades the original v0.1 prototype with fixes found by testing Lobster from a normal user/browser perspective.

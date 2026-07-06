@@ -12,7 +12,16 @@ BROKEN CODE → CRASH → FIX → RETRY → ✅ SUCCESS
 
 Lobster is a local-first repair loop for Python runtime failures. It runs your command, reads the real error, applies a small safe fix, then reruns the same command to prove the repair worked.
 
-## Latest Update: v0.1.1
+## Latest Update: v0.1.2
+
+This release adds machine-readable JSON reports for automation, CI, and agent workflows:
+
+- `run --json-report` prints command results as structured JSON.
+- `repair --json-report` prints iteration, suggestion, preview, apply, and verification state.
+- JSON output stays quiet and parseable instead of mixing in human logs.
+- Test coverage increased to `25 passed`.
+
+## Previous Update: v0.1.1
 
 This release focuses on first-run trust and CLI polish after black-box testing the project like a new user:
 
@@ -160,6 +169,32 @@ Apply safe repairs and rerun the original command:
 python -m lobster_ai_system repair --apply --max-iterations 4 -- <command>
 ```
 
+Print a machine-readable report for automation or CI:
+
+```powershell
+python -m lobster_ai_system repair --json-report -- python demo/missing_file.py
+```
+
+```json
+{
+  "ok": false,
+  "verified": false,
+  "preview": true,
+  "iterations": [
+    {
+      "iteration": 1,
+      "run": {
+        "ok": false,
+        "suggestion": {
+          "kind": "file_not_found",
+          "summary": "Missing file or path: demo\\generated\\config.txt"
+        }
+      }
+    }
+  ]
+}
+```
+
 ## Example: Dependency Repair
 
 If a script fails with a missing import:
@@ -235,7 +270,7 @@ python -m pytest -q
 Current validation:
 
 ```text
-23 passed
+25 passed
 ```
 
 Check the installed CLI:
