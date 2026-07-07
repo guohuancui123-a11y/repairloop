@@ -2,19 +2,79 @@
 
 # RepairLoop
 
-## A local-first Python repair engine for developers, CI, and AI agent workflows.
+Local-first Python runtime repair engine.
 
-Run broken Python code. Capture the real crash. Apply the smallest safe repair. Verify by rerunning the same command.
+Run → Capture → Repair → Verify.
 
-No API key. No cloud. No prompt guessing. No full-project rewrite.
+RepairLoop automatically diagnoses failed Python commands, applies minimal fixes, and verifies the result by rerunning the same command.
+
+No cloud. No API key. No source upload. No full-project rewrite.
 
 ```text
-BROKEN CODE → CRASH → FIX → RETRY → ✅ SUCCESS
+BROKEN PYTHON COMMAND → REAL CRASH → MINIMAL FIX → RERUN → VERIFIED
 ```
 
-RepairLoop is a local-first repair loop for Python runtime failures. It runs your command, reads the real error, applies a small safe fix, then reruns the same command to prove the repair worked.
+## 10-Second Demo
 
-Use it when you want a boring, inspectable repair primitive instead of a black-box coding agent.
+![RepairLoop 10-second demo](docs/assets/repairloop-demo.gif)
+
+Watch the MP4 version: [docs/assets/repairloop-demo.mp4](docs/assets/repairloop-demo.mp4)
+
+That is the whole idea: **run the broken thing, repair the real failure, verify the result.**
+
+## Quick Example
+
+A Python script fails because a local config file is missing:
+
+```powershell
+python demo/missing_file.py
+```
+
+```text
+FileNotFoundError: [Errno 2] No such file or directory: 'demo\generated\config.txt'
+```
+
+Preview the repair first:
+
+```powershell
+repair-loop repair -- python demo/missing_file.py
+```
+
+```text
+[FIX] file_not_found
+[FIX] Missing file or path: demo\generated\config.txt
+[FIX] actions:
+  - create_path:demo\generated\config.txt
+
+[PREVIEW] no changes were made; rerun with --apply to execute this fix
+```
+
+Then apply and verify:
+
+```powershell
+repair-loop repair --apply -- python demo/missing_file.py
+```
+
+```text
+[APPLY] ok: True
+[VERIFY] success
+```
+
+## Why RepairLoop?
+
+Most coding assistants generate patches.
+
+RepairLoop focuses on something narrower and more verifiable:
+
+**Can the program run again?**
+
+It follows a crash-driven repair loop:
+
+```text
+Failure → Diagnosis → Minimal repair → Execution verification
+```
+
+That makes it useful as a local developer tool, a CI primitive, or a repair layer inside agent workflows.
 
 ## What It Is
 
@@ -27,40 +87,10 @@ It is a deterministic repair loop for Python runtime failures:
 - **Small-patch biased:** it prefers narrow actions over broad rewrites.
 - **Safe by default:** dry-run is the default; `--apply` is required for changes.
 - **Automation-ready:** JSON reports make it usable from CI, launchers, and agent runtimes.
-- **Open-core path:** the Community edition stays useful, while deeper commercial workflows belong in the private Pro edition.
 
 If this saves you time, a GitHub star helps the project reach more builders.
 
-## 10-Second Demo
-
-![RepairLoop 10-second demo](docs/assets/repairloop-demo.gif)
-
-Watch the MP4 version: [docs/assets/repairloop-demo.mp4](docs/assets/repairloop-demo.mp4)
-
-That is the whole idea: **run the broken thing, repair the real failure, verify the result.**
-
-## Latest Update: v0.1.2
-
-This release adds machine-readable JSON reports for automation, CI, and agent workflows:
-
-- `run --json-report` prints command results as structured JSON.
-- `repair --json-report` prints iteration, suggestion, preview, apply, and verification state.
-- JSON output stays quiet and parseable instead of mixing in human logs.
-- Test coverage increased to `25 passed`.
-
-## Previous Update: v0.1.1
-
-This release focuses on first-run trust and CLI polish after black-box testing the project like a new user:
-
-- Invalid options now return clear CLI errors instead of Python tracebacks.
-- Dry-run mode now says `[PREVIEW] no changes were made`, so users know it is safe.
-- Missing or mistyped target commands are recognized as `command_start_error` with PATH / `--` usage guidance.
-- README examples now match the real command output.
-- Test coverage increased to `23 passed`.
-
-## Try It
-
-Clone and install locally:
+## Install
 
 ```powershell
 git clone https://github.com/guohuancui123-a11y/repairloop.git
@@ -68,59 +98,16 @@ cd repairloop
 python -m pip install -e .
 ```
 
-Dry-run first. RepairLoop shows the repair without changing anything:
+After installation, use either module mode:
 
 ```powershell
 python -m repair_loop repair -- python demo/missing_file.py
 ```
 
-```text
-[RUN] python demo/missing_file.py
-[ERROR] FileNotFoundError: [Errno 2] No such file or directory: 'demo\\generated\\config.txt'
-
-[FIX] file_not_found
-[FIX] Missing file or path: demo\\generated\\config.txt
-[FIX] actions:
-  - create_path:demo\\generated\\config.txt
-
-[PREVIEW] no changes were made; rerun with --apply to execute this fix
-[APPLY] reason: apply disabled; rerun with --apply to execute safe fix commands
-
-[VERIFY] not rerun; preview mode only
-```
-
-Then let it repair and verify:
+or the console command:
 
 ```powershell
-python -m repair_loop repair --apply --max-iterations 2 -- python demo/missing_file.py
-```
-
-```text
-[ITERATION 1]
-[RUN] python demo/missing_file.py
-[ERROR] FileNotFoundError: missing demo\\generated\\config.txt
-
-[FIX] create missing file
-[APPLY] ok: True
-
-[ITERATION 2]
-[RUN] python demo/missing_file.py
-[EXIT] 0
-
-[SUCCESS]
-[VERIFY] success
-```
-
-## Why This Is Different
-
-Most AI coding tools start with a prompt.
-
-RepairLoop starts with the crash.
-
-It does not try to rewrite your whole project. It watches what failed, matches the failure to a known repair pattern, applies the smallest local fix, and verifies by running the original command again.
-
-```text
-RUN → OBSERVE ERROR → SUGGEST FIX → APPLY → VERIFY → REPEAT
+repair-loop repair -- python demo/missing_file.py
 ```
 
 ## What RepairLoop Can Repair Today
@@ -149,31 +136,12 @@ RepairLoop's base engine is intentionally boring in the best way:
 
 Optional AI-enhanced layers may exist later, but the core repair engine must remain useful offline.
 
-## Install
+## Development Setup
 
-From a local checkout:
-
-```powershell
-cd repairloop
-python -m pip install -e .
-```
-
-For development:
+Install development dependencies from a local checkout:
 
 ```powershell
 python -m pip install -e .[dev]
-```
-
-After installation, use either module mode:
-
-```powershell
-python -m repair_loop repair -- python demo/missing_file.py
-```
-
-or the console command:
-
-```powershell
-repair-loop repair -- python demo/missing_file.py
 ```
 
 ## CLI
