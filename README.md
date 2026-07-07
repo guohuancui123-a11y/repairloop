@@ -31,6 +31,14 @@ It is a deterministic repair loop for Python runtime failures:
 
 If this saves you time, a GitHub star helps the project reach more builders.
 
+## 10-Second Demo
+
+![Lobster 10-second demo](docs/assets/lobster-demo.gif)
+
+Watch the MP4 version: [docs/assets/lobster-demo.mp4](docs/assets/lobster-demo.mp4)
+
+That is the whole idea: **run the broken thing, repair the real failure, verify the result.**
+
 ## Latest Update: v0.1.2
 
 This release adds machine-readable JSON reports for automation, CI, and agent workflows:
@@ -49,14 +57,6 @@ This release focuses on first-run trust and CLI polish after black-box testing t
 - Missing or mistyped target commands are recognized as `command_start_error` with PATH / `--` usage guidance.
 - README examples now match the real command output.
 - Test coverage increased to `23 passed`.
-
-## 10-Second Demo
-
-![Lobster 10-second demo](docs/assets/lobster-demo.gif)
-
-Watch the MP4 version: [docs/assets/lobster-demo.mp4](docs/assets/lobster-demo.mp4)
-
-That is the whole idea: **run the broken thing, repair the real failure, verify the result.**
 
 ## Try It
 
