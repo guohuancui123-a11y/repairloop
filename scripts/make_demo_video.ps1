@@ -69,46 +69,46 @@ function Save-Frame($index, $title, $subtitle, $lines) {
 
 $scenes = @(
     @{
-        Duration = 2
-        Title = "Run broken Python code"
-        Subtitle = "Start from the real failing command."
+        Duration = 3
+        Title = "1. A Python command fails"
+        Subtitle = "RepairLoop starts from the real runtime error."
         Lines = @(
-            @{ Text = "> python app.py"; Color = $blue },
+            @{ Text = "> python demo/missing_file.py"; Color = $blue },
             @{ Text = "Traceback (most recent call last):"; Color = $muted },
-            @{ Text = "ModuleNotFoundError: No module named 'flask'"; Color = $red }
+            @{ Text = "FileNotFoundError: config.txt not found"; Color = $red }
         )
     },
     @{
-        Duration = 3
-        Title = "RepairLoop reads the crash"
-        Subtitle = "It matches the error to a small local repair."
+        Duration = 4
+        Title = "2. Preview the repair"
+        Subtitle = "No files change until you explicitly apply."
         Lines = @(
-            @{ Text = "[ERROR] ModuleNotFoundError: flask"; Color = $red },
-            @{ Text = "[FIX] missing dependency detected"; Color = $yellow },
-            @{ Text = "[APPLY] python -m pip install flask"; Color = $blue },
-            @{ Text = "[APPLY] ok: True"; Color = $green }
+            @{ Text = "> repair-loop repair -- python demo/missing_file.py"; Color = $blue },
+            @{ Text = "[FIX] Missing file: config.txt"; Color = $yellow },
+            @{ Text = "[FIX] action: create config.txt"; Color = $muted },
+            @{ Text = "[PREVIEW] no changes were made"; Color = $green }
         )
     },
     @{
-        Duration = 3
-        Title = "Retry the same command"
-        Subtitle = "No guessing. The original command must pass."
+        Duration = 4
+        Title = "3. Apply the minimal fix"
+        Subtitle = "RepairLoop performs the narrow local repair."
         Lines = @(
-            @{ Text = "[RETRY] python app.py"; Color = $blue },
-            @{ Text = "[RUN] service starting..."; Color = $muted },
-            @{ Text = "[SUCCESS]"; Color = $green },
-            @{ Text = "[VERIFY] fixed"; Color = $green }
+            @{ Text = "> repair-loop repair --apply -- python demo/missing_file.py"; Color = $blue },
+            @{ Text = "[APPLY] creating config.txt"; Color = $yellow },
+            @{ Text = "[APPLY] ok: True"; Color = $green },
+            @{ Text = "[VERIFY] rerunning original command..."; Color = $muted }
         )
     },
     @{
-        Duration = 2
-        Title = "Broken code -> fixed code"
-        Subtitle = "That is RepairLoop in 10 seconds."
+        Duration = 4
+        Title = "4. Verification passes"
+        Subtitle = "The same command must run successfully."
         Lines = @(
-            @{ Text = "BROKEN CODE -> CRASH"; Color = $red },
-            @{ Text = "CRASH -> FIX"; Color = $yellow },
-            @{ Text = "FIX -> RETRY"; Color = $blue },
-            @{ Text = "RETRY -> SUCCESS"; Color = $green }
+            @{ Text = "[RUN] python demo/missing_file.py"; Color = $blue },
+            @{ Text = "[EXIT] 0"; Color = $green },
+            @{ Text = "[SUCCESS] repair applied"; Color = $green },
+            @{ Text = "[VERIFY] success"; Color = $green }
         )
     }
 )

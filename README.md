@@ -20,6 +20,8 @@ BROKEN PYTHON COMMAND → REAL CRASH → MINIMAL FIX → RERUN → VERIFIED
 
 Watch the MP4 version: [docs/assets/repairloop-demo.mp4](docs/assets/repairloop-demo.mp4)
 
+Social preview image: [docs/assets/repairloop-social-preview.png](docs/assets/repairloop-social-preview.png)
+
 That is the whole idea: **run the broken thing, repair the real failure, verify the result.**
 
 ## Quick Example
