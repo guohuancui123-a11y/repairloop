@@ -80,6 +80,10 @@ Failure → Diagnosis → Minimal repair → Execution verification
 
 That makes it useful as a local developer tool, a CI primitive, or a repair layer inside agent workflows.
 
+For a deeper design overview, see [docs/technical-overview.md](docs/technical-overview.md).
+
+For the planned execution-recovery benchmark, see [docs/benchmark-plan.md](docs/benchmark-plan.md).
+
 ## What It Is
 
 RepairLoop is not a chatbot and not a general autonomous developer.
